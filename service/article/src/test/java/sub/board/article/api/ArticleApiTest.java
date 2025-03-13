@@ -3,8 +3,11 @@ package sub.board.article.api;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.web.client.RestClient;
 import sub.board.article.service.response.ArticleResponse;
 
@@ -16,24 +19,21 @@ public class ArticleApiTest {
     RestClient restClient = RestClient.create("http://localhost:9000");
 
     // 생성 test 에서 출력된 id 값 사용
-    Long articleId = 158468578773970944L;
+    Long articleId;
 
-
+    // Article id 동적 생성
     @DisplayName("Article 생성")
-    @Test
-    void createTest() {
-        // Given
+    @BeforeEach
+    void setUp() {
+        //
         ArticleCreateRequest request = new ArticleCreateRequest("hi", "Ctest", 1L, 1L);
 
-        // When
+        // 테스트용 게시글을 먼저 생성하고 ID를 저장
         ArticleResponse response = create(request);
+        assertNotNull(response, "생성된 게시글이 null이면 안 됩니다.");
 
-        // Then
-        assertNotNull(response, "response 객체가 null 이면 안됩니다.");
-        assertThat(response.getTitle()).isEqualTo(request.getTitle());
-        assertThat(response.getContent()).isEqualTo(request.getContent());
-
-        System.out.println("response = " + response);
+        this.articleId = response.getArticleId();  // 동적으로 생성된 ID 저장
+        System.out.println("생성된 articleId = " + this.articleId);
     }
 
     ArticleResponse create(ArticleCreateRequest request) {
@@ -78,7 +78,6 @@ public class ArticleApiTest {
         assertThat(response.getTitle()).isEqualTo(request.getTitle());
         assertThat(response.getContent()).isEqualTo(request.getContent());
 
-
         System.out.println("response = " + response);
     }
 
@@ -101,7 +100,6 @@ public class ArticleApiTest {
         // Then
         Exception exception = assertThrows(Exception.class, () -> read(articleId));
         System.out.println("삭제 후 조회 시도 예외: " + exception.getMessage());
-
     }
 
 

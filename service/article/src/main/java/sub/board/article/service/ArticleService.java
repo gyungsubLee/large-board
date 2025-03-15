@@ -10,6 +10,9 @@ import sub.board.article.service.request.ArticleUpdateRequest;
 import sub.board.article.service.response.ArticleResponse;
 import sub.board.common.snowflake.Snowflake;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class ArticleService {
@@ -46,5 +49,12 @@ public class ArticleService {
     @Transactional
     public void delete(Long articleId) {
         articleRepository.deleteById(articleId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ArticleResponse> findAllArticle(Long boardId, int limit, int offset) {
+        return articleRepository.findAllArticle(boardId, limit, offset).stream()
+                .map(ArticleResponse::from)
+                .collect(Collectors.toList());
     }
 }

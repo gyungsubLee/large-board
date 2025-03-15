@@ -7,6 +7,8 @@ import sub.board.article.service.request.ArticleCreateRequest;
 import sub.board.article.service.request.ArticleUpdateRequest;
 import sub.board.article.service.response.ArticleResponse;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/articles")
@@ -21,6 +23,15 @@ public class ArticleController {
     @GetMapping("/{articleId}")
     public ArticleResponse read(@PathVariable Long articleId) {
         return articleService.read(articleId);
+    }
+
+    @GetMapping
+    public List<ArticleResponse> readAll(
+            @RequestParam Long boardId,
+            @RequestParam int limit,
+            @RequestParam int offset
+            ) {
+        return articleService.findAllArticle(boardId, limit, offset);
     }
 
     @PatchMapping("/{articleId}")

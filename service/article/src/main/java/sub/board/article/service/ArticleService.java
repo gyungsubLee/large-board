@@ -7,6 +7,7 @@ import sub.board.article.entity.Article;
 import sub.board.article.repository.ArticleRepository;
 import sub.board.article.service.request.ArticleCreateRequest;
 import sub.board.article.service.request.ArticleUpdateRequest;
+import sub.board.article.service.response.ArticlePageResponse;
 import sub.board.article.service.response.ArticleResponse;
 import sub.board.common.snowflake.Snowflake;
 
@@ -51,10 +52,15 @@ public class ArticleService {
         articleRepository.deleteById(articleId);
     }
 
-    @Transactional(readOnly = true)
-    public List<ArticleResponse> findAllArticle(Long boardId, int limit, int offset) {
-        return articleRepository.findAllArticle(boardId, limit, offset).stream()
-                .map(ArticleResponse::from)
-                .collect(Collectors.toList());
+    public ArticlePageResponse readAll(Long boardId, Long page, Long pageSize) {
+        return ArticlePageResponse.of(
+            articleRepository.findAllArticle(boardId, pageSize, (page - 1) * pageSize).stream()
+                    .map(ArticleResponse::from)
+                    .toList(),
+            articleRepository.count(
+                    boardId,
+                    PageLimitCalculator.calculatePageLimit(page, pageSize, 10L)
+            )
+        );
     }
 }

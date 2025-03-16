@@ -31,9 +31,19 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
                 LEFT JOIN article a ON t.article_id = a.article_id
             """,
         nativeQuery = true)
-    public List<Article> findAllArticle(
+    List<Article> findAllArticle(
             @Param("board_id") Long boardId,
-            @Param("limit") int limit,
-            @Param("offset") int offset
+            @Param("limit") Long limit,
+            @Param("offset") Long offset
     );
+
+    @Query(
+        value = """
+                SELECT COUNT(*) FROM (
+                    SELECT article_id FROM article WHERE board_id = :boardId LIMIT :limit
+                ) t
+            """,
+        nativeQuery = true
+    )
+    Long count(@Param("boardId") Long boardId, @Param("limit") Long limit);
 }

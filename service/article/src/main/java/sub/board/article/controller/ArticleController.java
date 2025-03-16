@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.*;
 import sub.board.article.service.ArticleService;
 import sub.board.article.service.request.ArticleCreateRequest;
 import sub.board.article.service.request.ArticleUpdateRequest;
+import sub.board.article.service.response.ArticlePageResponse;
 import sub.board.article.service.response.ArticleResponse;
 
 import java.util.List;
@@ -26,12 +27,12 @@ public class ArticleController {
     }
 
     @GetMapping
-    public List<ArticleResponse> readAll(
+    public ArticlePageResponse readAll(
             @RequestParam Long boardId,
-            @RequestParam int limit,
-            @RequestParam int offset
-            ) {
-        return articleService.findAllArticle(boardId, limit, offset);
+            @RequestParam Long page,
+            @RequestParam Long pageSize
+    ) {
+        return articleService.readAll(boardId, page, pageSize);
     }
 
     @PatchMapping("/{articleId}")

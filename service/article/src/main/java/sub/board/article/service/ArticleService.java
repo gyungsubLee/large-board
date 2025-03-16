@@ -1,5 +1,6 @@
 package sub.board.article.service;
 
+import jakarta.annotation.Nullable;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,6 +53,7 @@ public class ArticleService {
         articleRepository.deleteById(articleId);
     }
 
+    @Transactional(readOnly = true)
     public ArticlePageResponse readAll(Long boardId, Long page, Long pageSize) {
         return ArticlePageResponse.of(
             articleRepository.findAllArticle(boardId, pageSize, (page - 1) * pageSize).stream()
@@ -62,5 +64,13 @@ public class ArticleService {
                     PageLimitCalculator.calculatePageLimit(page, pageSize, 10L)
             )
         );
+    }
+
+    @Transactional(readOnly = true)
+    public List<ArticleResponse> readAllInfiniteScroll(Long boardId, Long pageSize, @Nullable Long lastArticleId) {
+        List<Article> articles = (lastArticleId == null) ?
+                articleRepository.findAllInfiniteScroll(boardId, pageSize) :
+                articleRepository.findAllInfiniteScroll(boardId, pageSize, lastArticleId);
+        return articles.stream().map(ArticleResponse::from).collect(Collectors.toList());
     }
 }

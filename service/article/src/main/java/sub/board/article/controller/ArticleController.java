@@ -35,6 +35,15 @@ public class ArticleController {
         return articleService.readAll(boardId, page, pageSize);
     }
 
+    @GetMapping("/infinite-scroll")
+    public List<ArticleResponse> readAllInfiniteScroll(
+            @RequestParam Long boardId,
+            @RequestParam Long pageSize,
+            @RequestParam(required = false) Long lastArticleId
+    ) {
+        return articleService.readAllInfiniteScroll(boardId, pageSize, lastArticleId);
+    }
+
     @PatchMapping("/{articleId}")
     public ArticleResponse update(@PathVariable Long articleId, @RequestBody ArticleUpdateRequest request) {
         return articleService.update(articleId, request);

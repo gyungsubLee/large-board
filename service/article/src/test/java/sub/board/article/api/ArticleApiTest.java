@@ -7,6 +7,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.util.UriComponents;
+import org.springframework.web.util.UriComponentsBuilder;
+import sub.board.article.service.response.ArticlePageResponse;
 import sub.board.article.service.response.ArticleResponse;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -40,6 +43,39 @@ public class ArticleApiTest {
                 .body(request)
                 .retrieve()
                 .body(ArticleResponse.class);
+    }
+
+    @DisplayName("전체 게시글 페이지 조회")
+    @Test
+    void readAllTest() {
+        // Given
+        Long boardId = 1L;
+        Long page = 1L;
+        Long pageSize =100L;
+
+        // When
+        ArticlePageResponse response = readAll(boardId, page, pageSize);
+
+        // Then
+        assertNotNull(response);
+
+        System.out.println("response.getArticleCount() = " + response.getArticleCount());
+        for (ArticleResponse article : response.getArticles()) {
+            System.out.println("articleId = " + article.getArticleId());
+        }
+    }
+
+    ArticlePageResponse readAll(Long boardId, Long page, Long pageSize) {
+        String uri = UriComponentsBuilder.fromPath("/api/v1/articles")
+                .queryParam("boardId", boardId)
+                .queryParam("page", page)
+                .queryParam("pageSize", pageSize)
+                .toUriString();
+
+        return restClient.get()
+                .uri(uri)
+                .retrieve()
+                .body(ArticlePageResponse.class);
     }
 
     @DisplayName("Article 조회")

@@ -5,7 +5,10 @@ import org.springframework.web.bind.annotation.*;
 import sub.board.article.service.ArticleService;
 import sub.board.article.service.request.ArticleCreateRequest;
 import sub.board.article.service.request.ArticleUpdateRequest;
+import sub.board.article.service.response.ArticlePageResponse;
 import sub.board.article.service.response.ArticleResponse;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -21,6 +24,15 @@ public class ArticleController {
     @GetMapping("/{articleId}")
     public ArticleResponse read(@PathVariable Long articleId) {
         return articleService.read(articleId);
+    }
+
+    @GetMapping
+    public ArticlePageResponse readAll(
+            @RequestParam Long boardId,
+            @RequestParam Long page,
+            @RequestParam Long pageSize
+    ) {
+        return articleService.readAll(boardId, page, pageSize);
     }
 
     @PatchMapping("/{articleId}")

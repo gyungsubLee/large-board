@@ -7,8 +7,12 @@ import sub.board.article.entity.Article;
 import sub.board.article.repository.ArticleRepository;
 import sub.board.article.service.request.ArticleCreateRequest;
 import sub.board.article.service.request.ArticleUpdateRequest;
+import sub.board.article.service.response.ArticlePageResponse;
 import sub.board.article.service.response.ArticleResponse;
 import sub.board.common.snowflake.Snowflake;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -46,5 +50,17 @@ public class ArticleService {
     @Transactional
     public void delete(Long articleId) {
         articleRepository.deleteById(articleId);
+    }
+
+    public ArticlePageResponse readAll(Long boardId, Long page, Long pageSize) {
+        return ArticlePageResponse.of(
+            articleRepository.findAllArticle(boardId, pageSize, (page - 1) * pageSize).stream()
+                    .map(ArticleResponse::from)
+                    .toList(),
+            articleRepository.count(
+                    boardId,
+                    PageLimitCalculator.calculatePageLimit(page, pageSize, 10L)
+            )
+        );
     }
 }

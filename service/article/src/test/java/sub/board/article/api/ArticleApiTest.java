@@ -1,16 +1,19 @@
 package sub.board.article.api;
 
 
+import jakarta.annotation.Nullable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.util.UriComponents;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.web.util.UriComponentsBuilder;
 import sub.board.article.service.response.ArticlePageResponse;
 import sub.board.article.service.response.ArticleResponse;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -44,6 +47,48 @@ public class ArticleApiTest {
                 .retrieve()
                 .body(ArticleResponse.class);
     }
+
+    @DisplayName("게시글 조회 - 무한스크롤")
+    @Test
+    void readAllInfiniteScrollTest() {
+        // Given
+        Long boardId = 1L;
+        Long pageSize = 30L;
+        Long lastArticleId;
+
+        // When
+        List<ArticleResponse> articles = readAllInfiniteScroll(boardId, pageSize, null);
+
+        lastArticleId = articles.getLast().getArticleId();
+
+        List<ArticleResponse> articles2 = readAllInfiniteScroll(boardId, pageSize, lastArticleId);
+
+        // Then
+        System.out.println("First Page!!");
+        for (ArticleResponse response : articles) {
+            System.out.println("response1 = " + response.getArticleId());
+        }
+
+        System.out.println("Second Page!!");
+        for (ArticleResponse response : articles2) {
+            System.out.println("response2 = " + response.getArticleId());
+        }
+    }
+
+    List<ArticleResponse> readAllInfiniteScroll(Long boardId, Long pageSize, @Nullable Long lastArticleId) {
+        String uri = UriComponentsBuilder.fromPath("/api/v1/articles/infinite-scroll")
+                .queryParam("boardId", boardId)
+                .queryParam("pageSize", pageSize)
+                .queryParam("lastArticleId", lastArticleId)
+                .toUriString();
+
+        return restClient.get()
+                .uri(uri)
+                .retrieve()
+                .body(new ParameterizedTypeReference<List<ArticleResponse>>() {});
+    }
+
+
 
     @DisplayName("전체 게시글 페이지 조회")
     @Test

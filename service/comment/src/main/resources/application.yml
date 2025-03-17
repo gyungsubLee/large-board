@@ -1,0 +1,19 @@
+server:
+  port: 9001
+
+spring:
+  application:
+    name: sub-board-article-service
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/mydb
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
+
+  jpa:
+    database-platform: org.hibernate.dialect.MySQLDialect
+    open-in-view: false
+    show-sql: false
+    hibernate:
+      ddl-auto: none

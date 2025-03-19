@@ -2,6 +2,7 @@ package sub.board.comment.api;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.client.RestClient;
@@ -14,25 +15,35 @@ public class CommentApiTest {
     RestClient restClient = RestClient.create("http://localhost:9001");
     String baseUrl = "/api/v1/comments";
 
-    @DisplayName("[댓글 생성] Depth: 2")
-    @Test
-    void createTest() {
+    String content1 = "테스트1";
+    String content2 = "테스트2";
+    Long parentCommentId;
+
+    CommentResponse parentCmtResponse;
+    CommentResponse childCmtResponse;
+
+
+    @DisplayName("댓글 생성(depth: 2) 기본 설정")
+    @BeforeEach
+    void setUp() {
         // Given
         Long articleId = 1L;
         Long writerId = 1L;
-        String content1 = "테스트1";
-        String content2 = "테스트2";
 
         // When
-          // Parent Comment
+        // Parent Comment
         CommentCreateRequest request1 = new CommentCreateRequest(articleId, content1, null, writerId);
-        CommentResponse parentCmtResponse = createComment(request1);
+        parentCmtResponse = createComment(request1);
 
-          // Child Comment
-        Long parentCommentId = parentCmtResponse.getCommentId();
+        // Child Comment
+        parentCommentId = parentCmtResponse.getCommentId();
         CommentCreateRequest request2 = new CommentCreateRequest(articleId, content2, parentCommentId, writerId);
-        CommentResponse childCmtResponse = createComment(request2);
+        childCmtResponse = createComment(request2);
+    }
 
+    @DisplayName("[댓글 생성] Depth: 2")
+    @Test
+    void createTest() {
         // Then
           // Parent Comment
         assertNotNull(parentCmtResponse);

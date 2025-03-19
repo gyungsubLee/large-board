@@ -37,9 +37,4 @@ allprojects {
 	tasks.named('test') {
 		useJUnitPlatform()
 	}
-
-	// FIXME: bootJar - mian 클래스 인식 오류 해결 필요
-	bootJar {
-		mainClass = 'sub.board.article.ArticleApplication'
-	}
 }

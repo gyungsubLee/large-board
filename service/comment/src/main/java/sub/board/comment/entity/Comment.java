@@ -7,7 +7,7 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Table(name = "table")
+@Table(name = "comment")
 @Getter
 @Entity
 @ToString

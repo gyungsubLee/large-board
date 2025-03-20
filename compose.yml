@@ -22,7 +22,6 @@ services:
     container_name: my-mysql
     environment:
       MYSQL_ROOT_PASSWORD: pwd123
-      MYSQL_DATABASE: mydb
       MYSQL_USER: me
       MYSQL_PASSWORD: 12345678
     ports:

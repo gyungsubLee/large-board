@@ -1,13 +1,19 @@
 package sub.board.comment.api;
 
+import jakarta.annotation.Nullable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClient;
+import sub.board.comment.service.response.CommentPageResponse;
 import sub.board.comment.service.response.CommentResponse;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -142,6 +148,90 @@ public class CommentApiTest {
         restClient.delete()
                 .uri(baseUrl + "/{commentId}", commentId)
                 .retrieve();
+    }
+
+    @DisplayName("[댓글 조회 - 페이징] ")
+    @Test
+    void readAllPageTest() {
+        // When
+        CommentPageResponse response = readAllPage(1L, 5000L, 30L);
+
+        // Then
+        for (CommentResponse comment : response.getComments()) {
+            if(!comment.getCommentId().equals(comment.getParentCommentId())) {
+                System.out.print("  ");
+            }
+            System.out.println("comment = " + comment.getCommentId());
+        }
+        System.out.println("commentCount = " + response.getCommentCount());
+    }
+
+    CommentPageResponse readAllPage(Long articleId, Long page, Long pageSize) {
+        String uri = UriComponentsBuilder.fromPath(baseUrl)
+                .queryParam("articleId", articleId)
+                .queryParam("page", page)
+                .queryParam("pageSize", pageSize)
+                .toUriString();
+
+        return restClient.get()
+                .uri(uri)
+                .retrieve()
+                .body(CommentPageResponse.class);
+    }
+
+
+
+    @DisplayName("[댓글 조회 - 무한스크롤]")
+    @Test
+    void readAllInfiniteScroll() {
+        // Given
+        Long articleId = 1L;
+        Long limit = 30L;
+        Long lastCommentId;
+        Long lastParentCommentId;
+
+        // When
+        List<CommentResponse> responses1 = readAllInfiniteScroll(articleId, limit, null, null);
+
+        lastCommentId = responses1.getLast().getCommentId();
+        lastParentCommentId = responses1.getLast().getParentCommentId();
+
+        List<CommentResponse> responses2 = readAllInfiniteScroll(articleId, limit, lastParentCommentId, lastCommentId);
+
+        // Then
+        // first scroll search
+        responses1.forEach((res) -> {
+            if(!res.getCommentId().equals(res.getParentCommentId())) {
+                System.out.print("    ");
+            }
+            System.out.println("res1.getCommentId() = " + res.getCommentId());
+        });
+
+        // second scroll search
+        responses2.forEach((res) -> {
+            if(!res.getCommentId().equals(res.getParentCommentId())) {
+                System.out.print("    ");
+            }
+            System.out.println("res2.getCommentId() = " + res.getCommentId());
+        });
+
+    }
+
+    List<CommentResponse> readAllInfiniteScroll(Long articleId, Long limit, Long lastParentCommentId, Long lastCommentId) {
+        String uri = UriComponentsBuilder
+                .fromUriString(baseUrl)
+                .path("/infinite-scroll")
+                .queryParam("articleId", articleId)
+                .queryParam("limit", limit)
+                .queryParam("lastParentCommentId", lastParentCommentId)
+                .queryParam("lastCommentId", lastCommentId)
+                .build()
+                .toUriString();
+
+        return restClient.get()
+                .uri(uri)
+                .retrieve()
+                .body(new ParameterizedTypeReference<List<CommentResponse>>() {});
     }
 
     @Getter

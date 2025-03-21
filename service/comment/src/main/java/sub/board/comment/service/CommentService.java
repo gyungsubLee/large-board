@@ -6,8 +6,11 @@ import org.springframework.transaction.annotation.Transactional;
 import sub.board.comment.entity.Comment;
 import sub.board.comment.repository.CommentRepository;
 import sub.board.comment.service.request.CommentCreateRequest;
+import sub.board.comment.service.response.CommentPageResponse;
 import sub.board.comment.service.response.CommentResponse;
 import sub.board.common.snowflake.Snowflake;
+
+import java.util.List;
 
 import static java.util.function.Predicate.not;
 
@@ -77,5 +80,23 @@ public class CommentService {
                     .filter(not(this::hasChildren))
                     .ifPresent(this::delete);
         }
+    }
+
+    public CommentPageResponse readAll(Long articleId, Long page, Long pageSize) {
+        return CommentPageResponse.of(
+                commentRepository.findAll(articleId, pageSize, (page - 1) * pageSize).stream()
+                        .map(CommentResponse::from)
+                        .toList(),
+                commentRepository.count(articleId, PageLimitCalculator.calculatePageLimit(page, pageSize, 10L))
+        );
+    }
+
+    public List<CommentResponse> readAllInfiniteScroll(Long articleId, Long limit, Long lastParentCommentId, Long lastCommentId) {
+        List<Comment> comments = lastParentCommentId == null || lastCommentId == null ?
+                commentRepository.findAllInfiniteScroll(articleId, limit) :
+                commentRepository.findAllInfiniteScroll(articleId, lastParentCommentId, lastCommentId, limit);
+        return comments.stream()
+                .map(CommentResponse::from)
+                .toList();
     }
 }
